@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería Multimedia NoSQL</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-10">
+
+<div class="max-w-xl mx-auto bg-white shadow-lg rounded-lg p-6 mb-8">
+
+<h1 class="text-2xl font-bold mb-4">
+Galería Multimedia NoSQL
+</h1>
+
+<form
+action="/api/multimedia"
+method="POST"
+enctype="multipart/form-data"
+class="space-y-4"
+>
+
+<div>
+<label class="block">Título</label>
+<input
+type="text"
+name="titulo"
+required
+class="w-full border p-2 rounded">
+</div>
+
+<div>
+<label class="block">Descripción</label>
+<textarea
+name="descripcion"
+class="w-full border p-2 rounded"></textarea>
+</div>
+
+<div>
+<label class="block">Imagen</label>
+<input
+type="file"
+name="imagen"
+accept="image/*"
+required>
+</div>
+
+<div>
+<label class="block">Audio</label>
+<input
+type="file"
+name="audio"
+accept="audio/*"
+required>
+</div>
+
+<button
+type="submit"
+class="bg-blue-600 text-white px-4 py-2 rounded">
+Guardar
+</button>
+
+</form>
+
+</div>
+
+<div class="max-w-6xl mx-auto">
+
+<h2 class="text-3xl font-bold mb-6">
+Elementos Guardados
+</h2>
+
+<div
+id="galeria"
+class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+</div>
+
+</div>
+
+<script>
+
+async function cargarGaleria() {
+
+    const respuesta = await fetch("/api/multimedia");
+
+    const datos = await respuesta.json();
+
+    const galeria = document.getElementById("galeria");
+
+    galeria.innerHTML = "";
+
+    datos.reverse().forEach(item => {
+
+        galeria.innerHTML += `
+            <div class="bg-white rounded-lg shadow-lg p-4">
+
+                <img
+                    src="${item.imagenUrl}"
+                    class="w-full h-60 object-cover rounded">
+
+                <h3 class="text-xl font-bold mt-3">
+                    ${item.titulo}
+                </h3>
+
+                <p class="text-gray-600 mb-3">
+                    ${item.descripcion || ""}
+                </p>
+
+                <audio controls class="w-full">
+                    <source src="${item.audioUrl}">
+                </audio>
+
+            </div>
+        `;
+    });
+}
+
+cargarGaleria();
+
+</script>
+
+</body>
+</html>
