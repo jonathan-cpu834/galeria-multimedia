@@ -85,7 +85,6 @@ class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 async function cargarGaleria() {
 
     const respuesta = await fetch("/api/multimedia");
-
     const datos = await respuesta.json();
 
     const galeria = document.getElementById("galeria");
@@ -109,13 +108,72 @@ async function cargarGaleria() {
                     ${item.descripcion || ""}
                 </p>
 
-                <audio controls class="w-full">
+                <audio controls class="w-full mb-4">
                     <source src="${item.audioUrl}">
                 </audio>
+
+                <div class="flex gap-2">
+
+                    <button
+                        onclick="editar('${item._id}')"
+                        class="bg-yellow-500 text-white px-3 py-2 rounded">
+                        Editar
+                    </button>
+
+                    <button
+                        onclick="eliminarElemento('${item._id}')"
+                        class="bg-red-600 text-white px-3 py-2 rounded">
+                        Eliminar
+                    </button>
+
+                </div>
 
             </div>
         `;
     });
+}
+
+async function eliminarElemento(id) {
+
+    const confirmar = confirm(
+        "¿Seguro que deseas eliminar este elemento?"
+    );
+
+    if (!confirmar) return;
+
+    await fetch(`/api/multimedia/${id}`, {
+        method: "DELETE"
+    });
+
+    cargarGaleria();
+}
+
+async function editar(id) {
+
+    const nuevoTitulo =
+        prompt("Nuevo título:");
+
+    if (!nuevoTitulo) return;
+
+    const nuevaDescripcion =
+        prompt("Nueva descripción:");
+
+    await fetch(`/api/multimedia/${id}`, {
+
+        method: "PUT",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            titulo: nuevoTitulo,
+            descripcion: nuevaDescripcion
+        })
+
+    });
+
+    cargarGaleria();
 }
 
 cargarGaleria();
