@@ -3,80 +3,84 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Galería Multimedia NoSQL</title>
-
+<title>Galería Multimedia CRUD</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 p-10">
+<body class="bg-gray-100 p-8">
 
-<div class="max-w-xl mx-auto bg-white shadow-lg rounded-lg p-6 mb-8">
+<div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow mb-8">
 
-<h1 class="text-2xl font-bold mb-4">
-Galería Multimedia NoSQL
-</h1>
+    <h1 class="text-3xl font-bold mb-4">
+        Galería Multimedia CRUD
+    </h1>
 
-<form
-action="/api/multimedia"
-method="POST"
-enctype="multipart/form-data"
-class="space-y-4"
->
+    <form
+        action="/api/multimedia"
+        method="POST"
+        enctype="multipart/form-data"
+        class="space-y-4"
+    >
 
-<div>
-<label class="block">Título</label>
-<input
-type="text"
-name="titulo"
-required
-class="w-full border p-2 rounded">
+        <div>
+            <label class="block font-semibold">Título</label>
+            <input
+                type="text"
+                name="titulo"
+                required
+                class="w-full border p-2 rounded"
+            >
+        </div>
+
+        <div>
+            <label class="block font-semibold">Descripción</label>
+            <textarea
+                name="descripcion"
+                class="w-full border p-2 rounded"
+            ></textarea>
+        </div>
+
+        <div>
+            <label class="block font-semibold">Imagen</label>
+            <input
+                type="file"
+                name="imagen"
+                accept="image/*"
+                required
+            >
+        </div>
+
+        <div>
+            <label class="block font-semibold">Audio</label>
+            <input
+                type="file"
+                name="audio"
+                accept="audio/*"
+                required
+            >
+        </div>
+
+        <button
+            type="submit"
+            class="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+            Guardar
+        </button>
+
+    </form>
+
 </div>
 
-<div>
-<label class="block">Descripción</label>
-<textarea
-name="descripcion"
-class="w-full border p-2 rounded"></textarea>
-</div>
+<div class="max-w-7xl mx-auto">
 
-<div>
-<label class="block">Imagen</label>
-<input
-type="file"
-name="imagen"
-accept="image/*"
-required>
-</div>
+    <h2 class="text-3xl font-bold mb-6">
+        CRUD ACTIVO
+    </h2>
 
-<div>
-<label class="block">Audio</label>
-<input
-type="file"
-name="audio"
-accept="audio/*"
-required>
-</div>
-
-<button
-type="submit"
-class="bg-blue-600 text-white px-4 py-2 rounded">
-Guardar
-</button>
-
-</form>
-
-</div>
-
-<div class="max-w-6xl mx-auto">
-
-<h2 class="text-3xl font-bold mb-6">
-Elementos Guardados
-</h2>
-
-<div
-id="galeria"
-class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-</div>
+    <div
+        id="galeria"
+        class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+    ></div>
 
 </div>
 
@@ -84,21 +88,28 @@ class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
 async function cargarGaleria() {
 
-    const respuesta = await fetch("/api/multimedia");
-    const datos = await respuesta.json();
+    try {
 
-    const galeria = document.getElementById("galeria");
+        const respuesta =
+            await fetch("/api/multimedia");
 
-    galeria.innerHTML = "";
+        const datos =
+            await respuesta.json();
 
-    datos.reverse().forEach(item => {
+        const galeria =
+            document.getElementById("galeria");
 
-        galeria.innerHTML += `
-            <div class="bg-white rounded-lg shadow-lg p-4">
+        galeria.innerHTML = "";
+
+        datos.reverse().forEach(item => {
+
+            galeria.innerHTML += `
+            <div class="bg-white p-4 rounded-lg shadow">
 
                 <img
                     src="${item.imagenUrl}"
-                    class="w-full h-60 object-cover rounded">
+                    class="w-full h-64 object-cover rounded"
+                >
 
                 <h3 class="text-xl font-bold mt-3">
                     ${item.titulo}
@@ -116,64 +127,87 @@ async function cargarGaleria() {
 
                     <button
                         onclick="editar('${item._id}')"
-                        class="bg-yellow-500 text-white px-3 py-2 rounded">
+                        class="bg-yellow-500 text-white px-3 py-2 rounded"
+                    >
                         Editar
                     </button>
 
                     <button
-                        onclick="eliminarElemento('${item._id}')"
-                        class="bg-red-600 text-white px-3 py-2 rounded">
+                        onclick="eliminarRegistro('${item._id}')"
+                        class="bg-red-600 text-white px-3 py-2 rounded"
+                    >
                         Eliminar
                     </button>
 
                 </div>
 
             </div>
-        `;
-    });
-}
+            `;
+        });
 
-async function eliminarElemento(id) {
+    } catch(error) {
 
-    const confirmar = confirm(
-        "¿Seguro que deseas eliminar este elemento?"
-    );
+        console.error(error);
 
-    if (!confirmar) return;
-
-    await fetch(`/api/multimedia/${id}`, {
-        method: "DELETE"
-    });
-
-    cargarGaleria();
+    }
 }
 
 async function editar(id) {
 
-    const nuevoTitulo =
+    const titulo =
         prompt("Nuevo título:");
 
-    if (!nuevoTitulo) return;
+    if(!titulo) return;
 
-    const nuevaDescripcion =
+    const descripcion =
         prompt("Nueva descripción:");
 
-    await fetch(`/api/multimedia/${id}`, {
+    try {
 
-        method: "PUT",
+        await fetch(`/api/multimedia/${id}`, {
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+            method: "PUT",
 
-        body: JSON.stringify({
-            titulo: nuevoTitulo,
-            descripcion: nuevaDescripcion
-        })
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-    });
+            body: JSON.stringify({
+                titulo,
+                descripcion
+            })
 
-    cargarGaleria();
+        });
+
+        cargarGaleria();
+
+    } catch(error) {
+
+        console.error(error);
+
+    }
+}
+
+async function eliminarRegistro(id) {
+
+    const confirmar =
+        confirm("¿Eliminar elemento?");
+
+    if(!confirmar) return;
+
+    try {
+
+        await fetch(`/api/multimedia/${id}`, {
+            method: "DELETE"
+        });
+
+        cargarGaleria();
+
+    } catch(error) {
+
+        console.error(error);
+
+    }
 }
 
 cargarGaleria();
